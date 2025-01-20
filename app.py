@@ -6,6 +6,12 @@ from datetime import datetime, timedelta
 import requests
 import io
 from collections import Counter
+import os
+from dotenv import load_dotenv
+from config import CLICKHOUSE_CONFIG
+
+# Load environment variables
+load_dotenv()
 
 # Set page config
 st.set_page_config(
@@ -49,7 +55,7 @@ if 'df' not in st.session_state:
     st.session_state.df = None
 
 def fetch_data(start_date, end_date):
-    url = "http://172.31.6.70:8123/"
+    url = os.getenv('CLICKHOUSE_URL') or CLICKHOUSE_CONFIG['url']
     query = f"""
     SELECT 
         partner,
@@ -76,7 +82,7 @@ def fetch_data(start_date, end_date):
     try:
         response = requests.post(
             url,
-            params={'database': 'prod'},
+            params={'database': os.getenv('CLICKHOUSE_DATABASE') or CLICKHOUSE_CONFIG['database']},
             data=query,
             headers={'Content-Type': 'application/x-www-form-urlencoded'}
         )
